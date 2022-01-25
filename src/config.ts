@@ -1,0 +1,1 @@
+export const nodeUrl = 'http://localhost';
