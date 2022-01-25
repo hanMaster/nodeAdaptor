@@ -33,7 +33,8 @@ export class AppService {
       this.httpService.post('/', body).pipe(map((resp) => resp.data)),
     );
     if (data.jsonrpc === '2.0' && data.id === 123 && data.result) {
-      data = data.result.map((item: SignatureDto) => item.signature);
+      const sorted = data.result.sort((t1, t2) => t1.slot - t2.slot);
+      data = sorted.map((item: SignatureDto) => item.signature);
     }
     return data;
   }
