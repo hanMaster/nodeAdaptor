@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { AppService } from './app.service';
 import { AddressesDto } from './interfaces/addresses-dto.interface';
 import { DepositsDto } from "./interfaces/depositsDto.interface";
