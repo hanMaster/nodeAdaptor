@@ -3,20 +3,22 @@ import { HttpService } from '@nestjs/axios';
 import { lastValueFrom, map } from 'rxjs';
 import { AddressEntity } from './interfaces/address-entity.interface';
 import { SignatureDto } from './interfaces/signatureDto.interface';
+import { DepositsDto } from "./interfaces/depositsDto.interface";
 
 @Injectable()
 export class AppService {
   constructor(private httpService: HttpService) {}
 
-  async getDeposits(adresses: AddressEntity[]): Promise<string[]> {
-    let hashList: string[] = [];
+  async getDeposits(adresses: AddressEntity[]): Promise<DepositsDto[]> {
+    let hashList: DepositsDto[] = [];
     for (const addr of adresses) {
       const list = await this.getSignaturesForAddress(addr);
       if (list && list.length){
-        hashList.push(...list);
+        hashList.push({
+          address: addr.address,
+          hashes: list
+        });
       }
-      console.log(hashList);
-
     }
     return hashList;
   }
