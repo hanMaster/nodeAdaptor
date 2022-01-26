@@ -3,6 +3,7 @@ import { AppService } from './app.service';
 import { DepositsRequestDto } from './interfaces/deposits-request-dto.interface';
 import { DepositsResponseDto } from "./interfaces/deposits-response-dto.interface";
 import { BalancesRequestDto } from "./interfaces/balances-request-dto.interface";
+import { BalancesResponseDto } from "./interfaces/balances-response-dto.interface";
 
 @Controller()
 export class AppController {
@@ -14,7 +15,7 @@ export class AppController {
   }
 
   @Post('balances')
-  async getBalances(@Body() body: BalancesRequestDto): Promise<number> {
+  async getBalances(@Body() body: BalancesRequestDto): Promise<BalancesResponseDto> {
     return this.appService.getBalances(body);
   }
 }

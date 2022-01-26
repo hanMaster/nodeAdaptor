@@ -6,6 +6,7 @@ import { SignatureDto } from './interfaces/signatureDto.interface';
 import { DepositsResponseDto } from './interfaces/deposits-response-dto.interface';
 import { BalancesRequestDto } from './interfaces/balances-request-dto.interface';
 import BigNumber from 'bignumber.js';
+import { BalancesResponseDto } from "./interfaces/balances-response-dto.interface";
 
 @Injectable()
 export class AppService {
@@ -41,11 +42,11 @@ export class AppService {
     return data;
   }
 
-  async getBalances(body: BalancesRequestDto) {
+  async getBalances(body: BalancesRequestDto): Promise<BalancesResponseDto> {
     const { addresses, tokenId } = body;
-    return tokenId
-      ? this.getTokenBalances(body)
-      : this.getSolBalances(addresses);
+    const balanceSum =  tokenId ? await this.getTokenBalances(body) : await this.getSolBalances(addresses);
+    console.log(`Balance: ${balanceSum}`);
+    return { balanceSum };
   }
 
   private async getSolBalances(addresses: string[]): Promise<number> {
