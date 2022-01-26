@@ -1,5 +1,5 @@
 import { AddressEntity } from "./address-entity.interface";
 
-export interface AddressesDto {
+export interface DepositsRequestDto {
   addresses: AddressEntity[]
 }

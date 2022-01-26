@@ -1,14 +1,20 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AppService } from './app.service';
-import { AddressesDto } from './interfaces/addresses-dto.interface';
-import { DepositsDto } from "./interfaces/depositsDto.interface";
+import { DepositsRequestDto } from './interfaces/deposits-request-dto.interface';
+import { DepositsResponseDto } from "./interfaces/deposits-response-dto.interface";
+import { BalancesRequestDto } from "./interfaces/balances-request-dto.interface";
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Post('deposits')
-  async getDeposits(@Body() body: AddressesDto): Promise<DepositsDto[]> {
+  async getDeposits(@Body() body: DepositsRequestDto): Promise<DepositsResponseDto[]> {
     return this.appService.getDeposits(body.addresses);
+  }
+
+  @Post('balances')
+  async getBalances(@Body() body: BalancesRequestDto): Promise<number> {
+    return this.appService.getBalances(body);
   }
 }

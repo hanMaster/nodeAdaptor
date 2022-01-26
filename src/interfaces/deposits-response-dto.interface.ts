@@ -1,4 +1,4 @@
-export interface DepositsDto {
+export interface DepositsResponseDto {
   address: string;
   hashes: string[];
 }
