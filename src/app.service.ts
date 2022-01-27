@@ -22,6 +22,7 @@ export class AppService {
           hashes: list,
         });
       }
+      await this.setImmediatePromise();
     }
     return hashList;
   }
@@ -119,5 +120,11 @@ export class AppService {
       );
     }
     return balance;
+  }
+
+  private setImmediatePromise() {
+    return new Promise((resolve) => {
+      setImmediate(resolve);
+    });
   }
 }
