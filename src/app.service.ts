@@ -12,22 +12,20 @@ import { BalancesResponseDto } from "./interfaces/balances-response-dto.interfac
 export class AppService {
   constructor(private httpService: HttpService) {}
 
-  async getDeposits(adresses: AddressEntity[]): Promise<DepositsResponseDto[]> {
+  async getDeposits(addresses: AddressEntity[]): Promise<DepositsResponseDto[]> {
     let hashList: DepositsResponseDto[] = [];
-    for (const addr of adresses) {
-      const list = await this.getSignaturesForAddress(addr);
-      if (list && list.length) {
-        hashList.push({
-          address: addr.address,
-          hashes: list,
-        });
-      }
-      await this.setImmediatePromise();
+    const promises = [];
+    for (const addr of addresses) {
+      promises.push(this.getSignaturesForAddress(addr, hashList))
     }
+    const start = process.hrtime();
+    await Promise.all(promises);
+    const end = process.hrtime(start);
+    console.log(`[getDeposits] request done for ${end[0]} sec`);
     return hashList;
   }
 
-  async getSignaturesForAddress(addr: AddressEntity) {
+  async getSignaturesForAddress(addr: AddressEntity, hashList: DepositsResponseDto[]) {
     const method = 'getSignaturesForAddress';
     const limit = 100;
     const until = addr.cursor;
@@ -40,7 +38,12 @@ export class AppService {
       const sorted = data.result.sort((t1, t2) => t1.slot - t2.slot);
       data = sorted.map((item: SignatureDto) => item.signature);
     }
-    return data;
+    if (data && data.length) {
+      hashList.push({
+        address: addr.address,
+        hashes: data,
+      });
+    }
   }
 
   async getBalances(body: BalancesRequestDto): Promise<BalancesResponseDto> {
@@ -122,9 +125,9 @@ export class AppService {
     return balance;
   }
 
-  private setImmediatePromise() {
-    return new Promise((resolve) => {
-      setImmediate(resolve);
-    });
-  }
+  // private setImmediatePromise() {
+  //   return new Promise((resolve) => {
+  //     setImmediate(resolve);
+  //   });
+  // }
 }
