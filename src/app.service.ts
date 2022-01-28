@@ -14,6 +14,7 @@ export class AppService {
 
   async getDeposits(addresses: AddressEntity[]): Promise<DepositsResponseDto[]> {
     let hashList: DepositsResponseDto[] = [];
+    const total = addresses.length;
     const start = process.hrtime();
     while (addresses.length) {
       const batch = addresses.splice(0, 10000);
@@ -28,7 +29,7 @@ export class AppService {
       await this.setImmediatePromise();
     }
     const end = process.hrtime(start);
-    console.log(`[getDeposits] TOTAL: ${addresses.length} done for ${end[0]} sec`);
+    console.log(`[getDeposits] TOTAL: ${total} done for ${end[0]} sec`);
 
     return hashList;
   }
