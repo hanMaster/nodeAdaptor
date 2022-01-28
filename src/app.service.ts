@@ -14,14 +14,22 @@ export class AppService {
 
   async getDeposits(addresses: AddressEntity[]): Promise<DepositsResponseDto[]> {
     let hashList: DepositsResponseDto[] = [];
-    const promises = [];
-    for (const addr of addresses) {
-      promises.push(this.getSignaturesForAddress(addr, hashList))
-    }
     const start = process.hrtime();
-    await Promise.all(promises);
+    while (addresses.length) {
+      const batch = addresses.splice(0, 10000);
+      const promises = [];
+      for (const adr of batch) {
+        promises.push(this.getSignaturesForAddress(adr, hashList));
+      }
+      const whileStart = process.hrtime();
+      await Promise.all(promises);
+      const whileEnd = process.hrtime(whileStart);
+      console.log(`[getDeposits] batch: ${batch.length} done for ${whileEnd[0]} sec`);
+      await this.setImmediatePromise();
+    }
     const end = process.hrtime(start);
-    console.log(`[getDeposits] request done for ${end[0]} sec`);
+    console.log(`[getDeposits] TOTAL: ${addresses.length} done for ${end[0]} sec`);
+
     return hashList;
   }
 
@@ -125,9 +133,9 @@ export class AppService {
     return balance;
   }
 
-  // private setImmediatePromise() {
-  //   return new Promise((resolve) => {
-  //     setImmediate(resolve);
-  //   });
-  // }
+  private setImmediatePromise() {
+    return new Promise((resolve) => {
+      setImmediate(resolve);
+    });
+  }
 }
