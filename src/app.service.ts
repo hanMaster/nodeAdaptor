@@ -76,7 +76,7 @@ export class AppService {
 
   private async getTokenBalances(body: BalancesRequestDto): Promise<number> {
     const decimals = await this.getDecimals(body.tokenId);
-    console.log(`[getTokenBalances] decimals: ${decimals}`);
+    console.log(`[getTokenBalances] tokenId: ${body.tokenId} decimals: ${decimals}`);
 
     const promises = [];
     for (const address of body.addresses) {
@@ -91,7 +91,7 @@ export class AppService {
       Number(nativeBalance.dividedBy(10 ** decimals)),
     );
     const balancesSum = balances.reduce((acc: number, cur: number) => acc + cur, 0);
-    console.log(`Token balances requested in ${end[0]} seconds balancesSum: ${balancesSum}`);
+    console.log(`TokenId: ${body.tokenId} balances requested in ${end[0]} seconds balancesSum: ${balancesSum}`);
     return balancesSum;
   }
 
