@@ -99,7 +99,7 @@ export class AppService {
     let data;
     const body = { jsonrpc: '2.0', id: 123, method, params };
     let response = await lastValueFrom(
-      this.httpService.post('/', body).pipe(map((resp) => resp.data)),
+      this.httpService.post('/', body, {timeout: 200000}).pipe(map((resp) => resp.data)),
     );
     if (response.id === 123 && response.result) {
       data = response.result;
