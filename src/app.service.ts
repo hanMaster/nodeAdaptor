@@ -57,28 +57,32 @@ export class AppService {
 
   async getBalances(body: BalancesRequestDto): Promise<BalancesResponseDto> {
     const { addresses, tokenId } = body;
-    const balanceSum =  tokenId ? await this.getTokenBalances(body) : await this.getSolBalances(addresses);
+    const { balanceSum, addressMap } = tokenId ? await this.getTokenBalances(body) : await this.getSolBalances(addresses);
     console.log(`Balance: ${balanceSum}`);
-    return { balanceSum };
+    return { balanceSum, addressMap };
   }
 
-  private async getSolBalances(addresses: string[]): Promise<number> {
+  private async getSolBalances(addresses: string[]): Promise<BalancesResponseDto> {
     let balance = new BigNumber('0');
+    const addressMap = new Map<string, number>();
     for (const address of addresses) {
       const data = await this.request('getBalance', [address]);
       if (data) {
+        addressMap.set(address, data.value);
         balance = balance.plus(new BigNumber(data.value));
       }
     }
     // decimals === 9 for SOL
-    return balance.dividedBy(10 ** 9).toNumber();
+    const balanceSum = balance.dividedBy(10 ** 9).toNumber()
+    return { balanceSum, addressMap }
   }
 
-  private async getTokenBalances(body: BalancesRequestDto): Promise<number> {
+  private async getTokenBalances(body: BalancesRequestDto): Promise<BalancesResponseDto> {
     const decimals = await this.getDecimals(body.tokenId);
     console.log(`[getTokenBalances] tokenId: ${body.tokenId} decimals: ${decimals}`);
 
     const promises = [];
+    const addressMap = new Map<string, number>();
     for (const address of body.addresses) {
       promises.push(this.getTokenBalanceForAddress(address, body.tokenId));
     }
@@ -87,12 +91,16 @@ export class AppService {
     const end = process.hrtime(start);
 
 
-    const balances = response.map((nativeBalance: BigNumber) =>
-      Number(nativeBalance.dividedBy(10 ** decimals)),
+    const balances:number[] = [];
+      response.map((nativeBalance: BigNumber, index) => {
+        const balance = Number(nativeBalance.dividedBy(10 ** decimals));
+        balances.push(balance);
+        addressMap.set(body.addresses[index], balance);
+      }
     );
-    const balancesSum = balances.reduce((acc: number, cur: number) => acc + cur, 0);
-    console.log(`TokenId: ${body.tokenId} balances requested in ${end[0]} seconds balancesSum: ${balancesSum}`);
-    return balancesSum;
+    const balanceSum = balances.reduce((acc: number, cur: number) => acc + cur, 0);
+    console.log(`TokenId: ${body.tokenId} balances requested in ${end[0]} seconds balancesSum: ${balanceSum}`);
+    return { balanceSum, addressMap };
   }
 
   private async request(method: string, params: any[]) {
