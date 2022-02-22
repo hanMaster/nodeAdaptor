@@ -22,4 +22,11 @@ export class AppController {
   ): Promise<BalancesResponseDto> {
     return this.appService.getBalances(body);
   }
+
+  @Post('balance-map')
+  async getBalancesMap(
+    @Body() body: BalancesRequestDto,
+  ): Promise<BalancesResponseDto> {
+    return this.appService.getBalancesWithAddresses(body);
+  }
 }

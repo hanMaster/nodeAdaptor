@@ -1,5 +1,5 @@
-import { AddressEntity } from "./address-entity.interface";
+import { AddressEntity } from './address-entity.interface';
 
 export interface DepositsRequestDto {
-  addresses: AddressEntity[]
+  addresses: AddressEntity[];
 }
