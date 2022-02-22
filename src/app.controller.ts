@@ -4,6 +4,7 @@ import { DepositsRequestDto } from './interfaces/deposits-request-dto.interface'
 import { DepositsResponseDto } from './interfaces/deposits-response-dto.interface';
 import { BalancesRequestDto } from './interfaces/balances-request-dto.interface';
 import { BalancesResponseDto } from './interfaces/balances-response-dto.interface';
+import { BalancesAndAddressesResponseDto } from './interfaces/balances-and-addresses-response-dto.interface';
 
 @Controller()
 export class AppController {
@@ -26,7 +27,7 @@ export class AppController {
   @Post('balance-map')
   async getBalancesMap(
     @Body() body: BalancesRequestDto,
-  ): Promise<BalancesResponseDto> {
+  ): Promise<BalancesAndAddressesResponseDto> {
     return this.appService.getBalancesWithAddresses(body);
   }
 }

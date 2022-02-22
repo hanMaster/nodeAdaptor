@@ -99,7 +99,7 @@ export class AppService {
   async getBalancesWithAddresses(body: BalancesRequestDto): Promise<BalancesAndAddressesResponseDto> {
     const { addresses, tokenId } = body;
     const { balanceSum, addressMap } = tokenId ? await this.getTokenBalancesWithAddresses(body) : await this.getSolBalancesWithAddresses(addresses);
-    console.log(`Balance: ${balanceSum}`);
+    console.log(`Balance: ${balanceSum}, addressMap: ${[...addressMap]}`);
     return { balanceSum, addressMap };
   }
 
