@@ -7,6 +7,7 @@ import { DepositsResponseDto } from './interfaces/deposits-response-dto.interfac
 import { BalancesRequestDto } from './interfaces/balances-request-dto.interface';
 import BigNumber from 'bignumber.js';
 import { BalancesResponseDto } from "./interfaces/balances-response-dto.interface";
+import { BalancesAndAddressesResponseDto } from './interfaces/balances-and-addresses-response-dto.interface';
 
 @Injectable()
 export class AppService {
@@ -93,6 +94,54 @@ export class AppService {
     const balancesSum = balances.reduce((acc: number, cur: number) => acc + cur, 0);
     console.log(`TokenId: ${body.tokenId} balances requested in ${end[0]} seconds balancesSum: ${balancesSum}`);
     return balancesSum;
+  }
+
+  async getBalancesWithAddresses(body: BalancesRequestDto): Promise<BalancesAndAddressesResponseDto> {
+    const { addresses, tokenId } = body;
+    const { balanceSum, addressMap } = tokenId ? await this.getTokenBalancesWithAddresses(body) : await this.getSolBalancesWithAddresses(addresses);
+    console.log(`Balance: ${balanceSum}, addressMap: ${[...addressMap]}`);
+    return { balanceSum, addressMap };
+  }
+
+  private async getSolBalancesWithAddresses(addresses: string[]): Promise<BalancesAndAddressesResponseDto> {
+    let balance = new BigNumber('0');
+    const addressMap = new Map<string, number>();
+    for (const address of addresses) {
+      const data = await this.request('getBalance', [address]);
+      if (data) {
+        addressMap.set(address, data.value);
+        balance = balance.plus(new BigNumber(data.value));
+      }
+    }
+    // decimals === 9 for SOL
+    const balanceSum = balance.dividedBy(10 ** 9).toNumber()
+    return { balanceSum, addressMap }
+  }
+
+  private async getTokenBalancesWithAddresses(body: BalancesRequestDto): Promise<BalancesAndAddressesResponseDto> {
+    const decimals = await this.getDecimals(body.tokenId);
+    console.log(`[getTokenBalances] tokenId: ${body.tokenId} decimals: ${decimals}`);
+
+    const promises = [];
+    const addressMap = new Map<string, number>();
+    for (const address of body.addresses) {
+      promises.push(this.getTokenBalanceForAddress(address, body.tokenId));
+    }
+    const start = process.hrtime();
+    const response = await Promise.all(promises);
+    const end = process.hrtime(start);
+
+
+    const balances:number[] = [];
+      response.map((nativeBalance: BigNumber, index) => {
+        const balance = Number(nativeBalance.dividedBy(10 ** decimals));
+        balances.push(balance);
+        addressMap.set(body.addresses[index], balance);
+      }
+    );
+    const balanceSum = balances.reduce((acc: number, cur: number) => acc + cur, 0);
+    console.log(`TokenId: ${body.tokenId} balances requested in ${end[0]} seconds balancesSum: ${balanceSum}`);
+    return { balanceSum, addressMap };
   }
 
   private async request(method: string, params: any[]) {
